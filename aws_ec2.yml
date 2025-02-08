@@ -1,7 +1,8 @@
-# Ansible dynamic inventory configuration for AWS EC2
+##Dynamic IP
+
 plugin: aws_ec2
 regions:
-  - us-east-2      # Change to your desired region (must match your AWS region)
+  - us-east-2
 filters:
   tag:team:
-    - julio        # Modify or remove as needed to match the tags on your EC2 instances
+    - julio
