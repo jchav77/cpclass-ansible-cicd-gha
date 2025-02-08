@@ -8,47 +8,36 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    # Step 1: Check out the repository code
     - uses: actions/checkout@v2
 
-    # Step 2: Set up Python environment
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
 
-    # Step 3: Update apt repositories
     - name: Update apt repositories
       run: sudo apt update
 
-    # Step 4: Install Boto3 (AWS SDK for Python)
     - name: Install Boto3
       run: pip install boto3
 
-    # Step 5: Install Ansible
     - name: Install Ansible
       run: pip install ansible
 
-    # Step 6: Configure AWS credentials
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-2  # Set your AWS region
-    
-    # Step 7: (Optional) View dynamic inventory listing
     - name: list servers
       run: ansible-inventory --graph -i aws_ec2.yml
 
-    
-    # Step 8: Print private key (for debugging - remove or comment out if not needed)
     - name: print ssh key
       run: echo "$PRIVATE_KEY"
       env:
         PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 
-    # Step 9: Create SSH directory and write private key
     - name: Set up SSH
       run: |
         mkdir ~/.ssh
@@ -57,7 +46,6 @@ jobs:
       env:
         PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 
-    # Step 10: Run Ansible playbook
     - name: Run Ansible Playbook
       run: ansible-playbook -i aws_ec2.yml nginx.yml
       env:
