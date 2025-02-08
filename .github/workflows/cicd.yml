@@ -1,0 +1,53 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Update apt repositories
+      run: sudo apt update
+
+    - name: Install Boto3
+      run: pip install boto3
+
+    - name: Install Ansible
+      run: pip install ansible
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-2  # Set your AWS region
+    - name: list servers
+      run: ansible-inventory --graph -i aws_ec2.yml
+
+    - name: print ssh key
+      run: echo "$PRIVATE_KEY"
+      env:
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+
+    - name: Set up SSH
+      run: |
+        mkdir ~/.ssh
+        echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+      env:
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+
+    - name: Run Ansible Playbook
+      run: ansible-playbook -i aws_ec2.yml nginx.yml
+      env:
+        PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+        ANSIBLE_HOST_KEY_CHECKING: False
